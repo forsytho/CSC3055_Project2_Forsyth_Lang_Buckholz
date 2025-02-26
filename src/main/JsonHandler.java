@@ -34,7 +34,7 @@ public class JsonHandler {
             System.out.println("Vault successfully saved.");
         } catch (IOException e){
             System.err.println("Error saving vault.json.");
-            e.printStackTrace;
+            e.printStackTrace();
         }
     }
     
