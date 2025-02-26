@@ -8,6 +8,7 @@ import java.util.Base64;
 import java.util.Scanner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bouncycastle.crypto.generators.SCrypt;
+import java.io.Console;
 
 public class Vault {
     private static final String VAULT_FILE = "vault.json";
@@ -55,7 +56,12 @@ public class Vault {
         System.out.println("Loading existing vault...");
 
         ObjectMapper objectMapper = new ObjectMapper();
-        vaultData = objectMapper.readValue(new File(VAULT_FILE), VaultData.class);
+        try{
+            vaultData = objectMapper.readValue(new File(VAULT_FILE), VaultData.class);
+        } catch (IOException e){
+            System.err.println("Error reading vault.json, it may be corrupted.");
+            vaultData = null; //Reset vault data
+        }
 
         byte[] salt = Base64.getDecoder().decode(vaultData.getSalt());
         vaultKey = deriveKey(password, salt);
@@ -64,12 +70,20 @@ public class Vault {
         byte[] encryptedKey = Base64.getDecoder().decode(vaultData.getVaultKey().getKey());
 
         byte[] decryptedKey = CryptoUtils.decryptAESGCM(encryptedKey, vaultKey, iv);
-        vaultKey = decryptedKey; // Use decrypted vault key for further operations
+        if(decryptedKey != null && decryptedKey.length > 0){
+            vaultKey = decryptedKey;
+        } else {
+            System.err.println("Error: Failed to decrypt vault key.");
+        }
 
         System.out.println("Vault successfully unsealed.");
     }
 
     private byte[] deriveKey(String password, byte[] salt) {
+        if(password == null || salt == null){
+            throw new IllegalArgumentException("Error: Password and salt cannot be null.");
+        }
+
         return SCrypt.generate(password.getBytes(StandardCharsets.UTF_8), salt, SCRYPT_COST, SCRYPT_BLOCK_SIZE, SCRYPT_PARALLELIZATION, SCRYPT_KEY_LENGTH);
     }
 
@@ -96,16 +110,37 @@ public class Vault {
     }
 
     private void saveVault() throws IOException {
+        File file = new File(VAULT_FILE);
+
+        //Ensure file exists
+        if(!file.exists()){
+            file.createNewFile();
+        }
+
+        //Ensure vaultData is not null
+        if(vaultData == null){
+            System.err.println("Error: Vault data is null. Cannot save.");
+            return;
+        }
+
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(VAULT_FILE), vaultData);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, vaultData);
     }
 
     public static void main(String[] args) {
-        try {
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("Enter vault password: ");
-            String password = scanner.nextLine();
+        Scanner scanner = new Scanner(System.in);
+        Console console = System.console();
 
+        String password;
+        if(console != null){
+            //Secure password input (hides characters)
+            password = new String(console.readPassword("Vault Password: "));
+        } else{
+            //Fallback for IDEs
+            System.out.print("Vault Password: ");
+            password = scanner.nextLine();
+        }
+        try {
             Vault vault = new Vault(password);
 
             while (true) {
@@ -116,7 +151,8 @@ public class Vault {
                 try{
                     choice = Integer.parseInt(input);
                 } catch (NumberFormatException e){
-                    choice = -1;
+                    System.out.println("Invalid input. Please enter a number.");
+                    continue; // Go back to menu
                 }
 
                 switch (choice) {
@@ -142,7 +178,7 @@ public class Vault {
                         return;
 
                     default:
-                        System.out.println("Invalid option.");
+                        System.out.println("Invalid option. Try again.");
                 }
             }
         } catch (Exception e) {
