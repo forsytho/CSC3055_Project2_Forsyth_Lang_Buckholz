@@ -1,0 +1,9 @@
+{
+    "salt": "",
+    "vaultkey": {
+        "iv": "",
+        "key": ""
+    },
+    "passwords": [],
+    "privkeys": []
+}
