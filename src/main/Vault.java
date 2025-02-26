@@ -111,8 +111,13 @@ public class Vault {
             while (true) {
                 System.out.println("\n1. Add Password\n2. Lookup Password\n3. Exit");
                 System.out.print("Choose an option: ");
-                int choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                String input = scanner.nextLine();
+                int choice;
+                try{
+                    choice = Integer.parseInt(input);
+                } catch (NumberFormatException e){
+                    choice = -1;
+                }
 
                 switch (choice) {
                     case 1:
