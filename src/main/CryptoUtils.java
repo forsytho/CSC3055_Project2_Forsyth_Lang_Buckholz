@@ -24,6 +24,16 @@ public class CryptoUtils {
     }
 
     // Encrypt data using AES-GCM
+
+    /**
+     * 
+     * 
+     * @param data - data to be encrypted
+     * @param key - key to encrypt data with
+     * @param iv - given initialization vector
+     * @return - encrypted data in Base64 format
+     * @throws Exception
+     */
     public static String encryptAESGCM(byte[] data, byte[] key, byte[] iv) throws Exception {
         Cipher cipher = Cipher.getInstance(AES_GCM);
         SecretKey secretKey = new SecretKeySpec(key, AES);
