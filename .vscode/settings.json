@@ -1,9 +1,0 @@
-{
-    "java.project.referencedLibraries": [
-        "lib/**/*.jar",
-        "Network Security/**/*.jar",
-        "c:\\Users\\abuck\\Downloads\\jackson-core-2.18.2.jar",
-        "c:\\Users\\abuck\\Downloads\\jackson-databind-2.18.2.jar",
-        "c:\\Users\\abuck\\Downloads\\jackson-annotations-2.18.2.jar"
-    ]
-}
