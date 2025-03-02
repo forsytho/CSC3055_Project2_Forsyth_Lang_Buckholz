@@ -1,3 +1,5 @@
+package main;
+
 /**
  * Represents a stored private key entry in the vault
  * This class extends VaultEntry and includes encrypted private key

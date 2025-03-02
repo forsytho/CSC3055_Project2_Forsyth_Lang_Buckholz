@@ -1,3 +1,5 @@
+package main;
+
 /**
  * Represents a stored password entry in the vault
  * This class extends VaultEntry and includes encrypted password

@@ -1,3 +1,5 @@
+package main;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -9,6 +11,7 @@ import java.util.Scanner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bouncycastle.crypto.generators.SCrypt;
 import java.io.Console;
+import main.VaultData;
 
 public class Vault {
     private static final String VAULT_FILE = "vault.json";

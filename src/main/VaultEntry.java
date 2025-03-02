@@ -1,3 +1,5 @@
+package main;
+
 /**
  * Abstract class representing a generic vault entry
  * This serves as a base class for PasswordEntry and PrivateKeyEntry
