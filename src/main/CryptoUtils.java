@@ -23,10 +23,10 @@ public class CryptoUtils {
         return generateRandomBytes(IV_SIZE);
     }
 
-    // Encrypt data using AES-GCM
+
 
     /**
-     * 
+     * Encrypt data using AES-GCM, return as Base64
      * 
      * @param data - data to be encrypted
      * @param key - key to encrypt data with

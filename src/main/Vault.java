@@ -135,7 +135,7 @@ public class Vault {
     
         // Retrieve encrypted vault key + IV from the VaultKey object, to be decrypted with the derived root key
         byte[] vaultKeyIV = Base64.getDecoder().decode(tempVaultData.getVaultKey().getIv());
-        byte[] encryptedVaultKey = Base64.getDecoder().decode(tempVaultData.getVaultKey().getEncryptedKey());
+        byte[] encryptedVaultKey = Base64.getDecoder().decode(tempVaultData.getVaultKey().getKey());
     
 
         // Now, try decrypting the vault key using the derived root key
@@ -144,7 +144,7 @@ public class Vault {
             // Recover the raw, unencrypted vault key that we use for encryption/decryption of secrets
             rawVaultKey = CryptoUtils.decryptAESGCM(encryptedVaultKey, derivedRootKey, vaultKeyIV);
     
-            // If no error happened above, we have the correct password and the vault can be unsealed
+            // If no error happened above, we have the correct password and the vault's secrets can be accessed
             vaultData = JsonHandler.loadVault();
 
             System.out.println("Vault successfully unsealed.");
@@ -175,20 +175,146 @@ public class Vault {
 
 
     /**
-     * Add a password entry to the vault
-     * 
-     * @param service - name of the service associated with the password
-     * @param username - username for the service
-     * @param password - password to store
+     * Adds a new password entry to the vault
+     * Encrypts the plaintext password with raw vault key
+     * Service and username are not encrypted, but are included as additional authenticated data
+     *
+     * @param service  The service name (e.g., "example.com").
+     * @param username The username for the service.
+     * @param password The plaintext password.
      * @throws GeneralSecurityException
      * @throws IOException
      */
+    public void addPasswordEntry(String service, String username, String plaintextPassword) throws GeneralSecurityException, IOException {
+        
+        // Generate a new IV for this password entry
+        byte[] entryIV = CryptoUtils.generateRandomBytes(12);
 
-     public void add
-    
+        // Construct the additional authenticated data (AAD) for the encryption
+        String aadString = service + username;
+        byte[] aad = aadString.getBytes(StandardCharsets.UTF_8);
+
+        // Encrypt the plaintext password using the raw vault key and the newly generated IV
+        String encryptedPassword;
+        try {
+            encryptedPassword = CryptoUtils.encryptAESGCMWithAAD(
+                    plaintextPassword.getBytes(StandardCharsets.UTF_8),
+                    rawVaultKey,
+                    entryIV,
+                    aad
+            );
+        } catch (Exception e) {
+            throw new GeneralSecurityException("Error encrypting password entry", e);
+        }
+
+        // Create a new PasswordEntry object and add it to the vault data
+        PasswordEntry newEntry = new PasswordEntry(
+                Base64.getEncoder().encodeToString(entryIV),
+                service,
+                username,
+                encryptedPassword
+        );
+
+        // Add the new entry to the vault data and save the updated vault to disk.
+        vaultData.getPasswords().add(newEntry);
+        saveVault(vaultData);
+    }
+
 
     /**
-     * Saves the vault data to a file
+     * Looks up the password entry for a given service and username,
+     * then decrypts the stored encrypted password using AES-GCM with AAD.
+     *
+     * @param service   service name 
+     * @param username  username for the service
+     * @return          decrypted plaintext password, or service not found
+     * @throws GeneralSecurityException 
+     */
+    public String lookupPassword(String service, String username) throws GeneralSecurityException {
+
+        // iterate through the stored password entries in the vault
+        for (PasswordEntry entry : vaultData.getPasswords()) {
+
+            // check if both the service and username match the lookup criteria.
+            if (entry.getService().equals(service) && entry.getUser().equals(username)) {
+
+                // Retrieve the IV for this password entry (Base64-decoded)
+                byte[] entryIV = Base64.getDecoder().decode(entry.getIv());
+
+                // Construct the Additional Authenticated Data from service and username
+                String aadString = service + username;
+                byte[] aad = aadString.getBytes(StandardCharsets.UTF_8);
+
+                // try to decrypt the stored encrypted password using the raw vault key, IV, and aad
+                try {
+
+                    byte[] decryptedBytes = CryptoUtils.decryptAESGCMWithAAD(entry.getPass(), rawVaultKey, entryIV, aad);
+
+                    // turn the returned bytes back into a string and return this constructed plaintext password
+                    return new String(decryptedBytes, StandardCharsets.UTF_8);
+
+                } catch (Exception e) {
+                    throw new GeneralSecurityException("Error decrypting password for service: " + service, e);
+                }
+            }
+        }
+        return "Service not found.";
+    }
+    
+    /**
+     * Adds a new privateKeyEntry object to the vault data
+     * Encrypts the provided private key using the raw vault key,
+     * then stores it along with the service name
+     *
+     * @param service     service name associated with the private key
+     * @param privateKey  private key bytes to be encrypted then stored
+     * @throws GeneralSecurityException 
+     * @throws IOException              
+     */
+    public void addPrivateKeyEntry(String service, byte [] privateKey) throws GeneralSecurityException, IOException {
+
+        // Generate new IV for private key encryption before storing it
+        byte[] entryIV = CryptoUtils.generateRandomBytes(12);
+        
+        // Encrypt the plaintext private key using the raw vault key and the generated IV
+        String encryptedPrivateKey;
+        try {
+            encryptedPrivateKey = CryptoUtils.encryptAESGCM(
+                privateKey,
+                rawVaultKey,
+                entryIV
+            );
+
+        } catch (Exception e) {
+
+            throw new GeneralSecurityException("Error encrypting private key entry", e);
+        }
+        
+        // Create a new PrivateKeyEntry object.
+        // Note: IV is stored in Base64 format; the service name remains in plaintext.
+        PrivateKeyEntry entry = new PrivateKeyEntry(
+            Base64.getEncoder().encodeToString(entryIV),
+            service,
+            encryptedPrivateKey
+        );
+        
+        // Add the new entry to the in-memory list of private key entries.
+        vaultData.getPrivkeys().add(entry);
+        
+        // Save the updated vault data back to disk.
+        JsonHandler.saveVault(vaultData);
+        
+        System.out.println("Private key entry added.");
+    }
+
+    
+
+
+
+
+
+    /**
+     * Saves the vault data to a file using the JsonHandler class 
      * 
      * @throws IOException
      */

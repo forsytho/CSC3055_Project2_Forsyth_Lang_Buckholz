@@ -4,14 +4,14 @@
  */
 public class PrivateKeyEntry extends VaultEntry {
 
-    private String privkey; // private key
+    private String privkey; // encryted private key stored as a Base64-encoded string
 
     /**
      * Constructs a PrivateKeyEntry with the given IV, service name, and private key
      *
-     * @param iv       Base64-encoded IV used for encryption.
-     * @param service  name of the service associated with the private key.
-     * @param privkey  encrypted private key stored as a Base64-encoded string.
+     * @param iv       Base64-encoded IV used for encryption
+     * @param service  plaintext name  of the service associated with the private key
+     * @param privkey  Base64-encoded encrypted private key 
      */
     public PrivateKeyEntry(String iv, String service, String privkey) {
         super(iv, service);
