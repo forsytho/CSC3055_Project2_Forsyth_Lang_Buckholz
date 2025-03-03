@@ -1,19 +1,19 @@
 
 /**
- * VaultKey is an object that holds the encrypted pair (key, IV) that are used to encrypt/decrypt vault data
+ * VaultKey is an object that holds the encrypted pair (key, IV) 
  */
 public class VaultKey {
     private String iv;
-    private String encryptedKey;
+    private String key;
 
     /**
      * Constructor for VaultKey
      * @param iv - IV used for encryption of the raw vault key
-     * @param encryptedKey - encrypted version of raw vault key
+     * @param Key - encrypted version of raw vault key
      */
-    public VaultKey(String iv, String encryptedKey) {
+    public VaultKey(String iv, String key) {
         this.iv = iv;
-        this.encryptedKey = encryptedKey;
+        this.key = key;
     }
 
     /**
@@ -29,8 +29,8 @@ public class VaultKey {
      * Gets encrypted vault key
      * @return - encrypted vault key in Base64 format
      */
-    public String getEncryptedKey() {
-        return encryptedKey;
+    public String getKey() {
+        return key;
     }
     
 }

@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class VaultData {
     private String salt; // Base64-encoded salt for key derivation
-    private VaultKey vaultKey; // The key used to encrypt/decrypt the vault
+    private VaultKey vaultKey; // The key object, containing base64-encoded IV and encrypted key
 
     private List<PasswordEntry> passwords;
     private List<PrivateKeyEntry> privkeys;
@@ -19,7 +19,7 @@ public class VaultData {
      * Constructs a VaultData object
      *
      * @param salt          Base64-encoded salt for key derivation
-     * @param vaultKey      Base64-encoded encrypted vault key
+     * @param vaultKey      Base64-encoded encrypted vault key and IV
      */
     public VaultData(String salt, VaultKey vaultKey) {
 
@@ -32,7 +32,7 @@ public class VaultData {
 
     public String getSalt() { return salt; }
 
-    public String getEncryptedVaultKey() { return vaultKey; }
+    public VaultKey getVaultKey() { return vaultKey; }
 
     public List<PasswordEntry> getPasswords() { return passwords; }
     public List<PrivateKeyEntry> getPrivkeys() { return privkeys; }
