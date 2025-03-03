@@ -175,13 +175,13 @@ public class Vault {
 
 
     /**
-     * Adds a new password entry to the vault
+     * Adds a new password entry object to the vault
      * Encrypts the plaintext password with raw vault key
      * Service and username are not encrypted, but are included as additional authenticated data
      *
-     * @param service  The service name (e.g., "example.com").
-     * @param username The username for the service.
-     * @param password The plaintext password.
+     * @param service  service name 
+     * @param username username for the service
+     * @param password plaintext password
      * @throws GeneralSecurityException
      * @throws IOException
      */
@@ -217,7 +217,10 @@ public class Vault {
 
         // Add the new entry to the vault data and save the updated vault to disk.
         vaultData.getPasswords().add(newEntry);
-        saveVault(vaultData);
+
+        JsonHandler.saveVault(vaultData);
+
+        System.out.println("Password entry added.");
     }
 
 
@@ -307,25 +310,12 @@ public class Vault {
         System.out.println("Private key entry added.");
     }
 
+
+
+
+
+
     
-
-
-
-
-
-    /**
-     * Saves the vault data to a file using the JsonHandler class 
-     * 
-     * @throws IOException
-     */
-    private void saveVault(VaultData vaultData) throws IOException {
-        JsonHandler.saveVault(vaultData);
-    }
-
-
-
-
-
     /**
      * Main method for the Vault program
      * Queries user for vault password

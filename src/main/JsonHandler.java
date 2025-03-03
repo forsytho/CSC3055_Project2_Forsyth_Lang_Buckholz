@@ -82,8 +82,8 @@ public class JsonHandler {
 
 
     /**
-     * Loads text from vault.json into a VaultData object, 
-     * Which contains salt, vaultKey, and encrypted passwords and private keys
+     * Loads all text from vault.json into a VaultData object, 
+     * Which contains salt, vaultKey, and encrypted secrets
      * 
      * @return vaultData - VaultData object containing salt, vaultKey, and encrypted secrets
      */
