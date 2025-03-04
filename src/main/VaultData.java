@@ -4,11 +4,13 @@ import java.util.List;
 /**
  * Represents the in-memory storage for the Vault
  * When the user opens the vault, data from vault.json is loaded into this object
- * When the user seals the vault, the data is saved from this object
+ * When the user seals the vault, the data is copied from this object to vault.json
+ * Then, this object is cleared
  */
 public class VaultData {
     private String salt; // Base64-encoded salt for key derivation
-    private String encryptedVaultKey; // Encrypted vault key (stored in JSON)
+    private VaultKey vaultKey; // The key object, containing base64-encoded IV and encrypted key
+
     private List<PasswordEntry> passwords;
     private List<PrivateKeyEntry> privkeys;
 
@@ -16,18 +18,22 @@ public class VaultData {
     /**
      * Constructs a VaultData object
      *
-     * @param salt               Base64-encoded salt for key derivation
-     * @param encryptedVaultKey  Base64-encoded encrypted vault key
+     * @param salt          Base64-encoded salt for key derivation
+     * @param vaultKey      Base64-encoded encrypted vault key and IV
      */
-    public VaultData(String salt, String encryptedVaultKey) {
+    public VaultData(String salt, VaultKey vaultKey) {
+
         this.salt = salt;
-        this.encryptedVaultKey = encryptedVaultKey;
+        this.vaultKey = vaultKey;
+
         this.passwords = new ArrayList<>();
         this.privkeys = new ArrayList<>();
     }
-    
+
     public String getSalt() { return salt; }
-    public String getEncryptedVaultKey() { return encryptedVaultKey; }
+
+    public VaultKey getVaultKey() { return vaultKey; }
+
     public List<PasswordEntry> getPasswords() { return passwords; }
     public List<PrivateKeyEntry> getPrivkeys() { return privkeys; }
 }

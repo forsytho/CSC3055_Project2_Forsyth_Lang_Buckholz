@@ -1,6 +1,6 @@
 {
     "salt": "",
-    "vaultkey": {
+    "vaultKey": {
         "iv": "",
         "key": ""
     },
