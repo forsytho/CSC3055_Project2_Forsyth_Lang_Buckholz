@@ -41,8 +41,6 @@ public class Vault {
      */
     public Vault(String password) throws GeneralSecurityException, IOException {
 
-        System.out
-
         if (!new File(VAULT_FILE).exists()) {
 
             createNewVault(password);
@@ -196,7 +194,7 @@ public class Vault {
         byte[] entryIV = CryptoUtils.generateRandomBytes(12);
 
         // Construct the additional authenticated data (AAD) for the encryption
-        String aadString = service + username;
+        String aadString = service + ":" + username;
         byte[] aad = aadString.getBytes(StandardCharsets.UTF_8);
 
         // Encrypt the plaintext password using the raw vault key and the newly generated IV
@@ -224,6 +222,8 @@ public class Vault {
 
         JsonHandler.saveVault(vaultData);
     }
+
+
     /**
      * Adds a new password entry object to the vault
      * Encrypts the plaintext password with raw vault key
@@ -241,7 +241,7 @@ public class Vault {
         byte[] entryIV = CryptoUtils.generateRandomBytes(12);
 
         // Construct the additional authenticated data (AAD) for the encryption
-        String aadString = service + username;
+        String aadString = service + ":" + username;
         byte[] aad = aadString.getBytes(StandardCharsets.UTF_8);
 
         // Encrypt the plaintext password using the raw vault key and the newly generated IV
@@ -295,7 +295,7 @@ public class Vault {
                 byte[] entryIV = Base64.getDecoder().decode(entry.getIv());
 
                 // Construct the Additional Authenticated Data from service and username
-                String aadString = service + username;
+                String aadString = service + ":" + username;
                 byte[] aad = aadString.getBytes(StandardCharsets.UTF_8);
 
                 // try to decrypt the stored encrypted password using the raw vault key, IV, and aad
@@ -367,7 +367,7 @@ public class Vault {
      * @throws Exception
      */
     public void addNewElGamal(String service) throws Exception {
-        
+
     // Generate a 512-bit ElGamal key pair using the new CryptoUtils method
     KeyPair elGamalKeyPair = CryptoUtils.generateElGamalKeyPair();
     
@@ -417,6 +417,7 @@ public class Vault {
             }
         }
         return "Service not found.";
+    }
 
     
     /**
