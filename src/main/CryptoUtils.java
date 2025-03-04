@@ -132,41 +132,6 @@ public class CryptoUtils {
 
 
     /**
-     * Generates a random password of the specified length
-     *
-     * @param length  desired length of the password
-     * @return        randomly generated password
-     * @throws IllegalArgumentException 
-     */
-    public static String generateRandomPassword(int length) {
-
-        if (length <= 0) {
-            throw new IllegalArgumentException("Password length must be greater than zero");
-        }
-        if (length < 7) {
-            System.out.println("Warning: a password length of less than 7 is not recommended for security purposes");
-        }
-        
-        // Define the allowed character set
-        final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#$%!&*@?";
-        
-        // Create a SecureRandom instance for random number generation
-        SecureRandom random = new SecureRandom();
-        StringBuilder password = new StringBuilder(length);
-        
-        
-
-        // for: the length of password, generate a random index and select the character at that index, add to password string
-        for (int i = 0; i < length; i++) {
-            int index = random.nextInt(CHARACTERS.length());
-            password.append(CHARACTERS.charAt(index));
-        }
-        
-        return password.toString();
-    }
-
-
-    /**
      * Generates a 512-bit ElGamal key pair using bouncy castle 
      * 
      * @return KeyPair object containing the public and private key
