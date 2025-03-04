@@ -3,8 +3,16 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.util.Base64;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 
 public class CryptoUtils {
     private static final String AES = "AES";
@@ -26,7 +34,7 @@ public class CryptoUtils {
 
 
     /**
-     * Encrypt data using AES-GCM, return as Base64
+     * Encrypts data and then returns as a Base64 encoded string
      * 
      * @param data - data to be encrypted
      * @param key - key to encrypt data with
@@ -45,7 +53,14 @@ public class CryptoUtils {
         return Base64.getEncoder().encodeToString(encryptedData);
     }
 
-    // Decrypt data using AES-GCM
+    /**
+     * Decrypts data that has been encrypted using AES-GCM
+     * @param encryptedData
+     * @param key
+     * @param iv 
+     * @return byte[] of decrypted data
+     * @throws Exception
+     */
     public static byte[] decryptAESGCM(byte[] encryptedData, byte[] key, byte[] iv) throws Exception {
         Cipher cipher = Cipher.getInstance(AES_GCM);
         SecretKey secretKey = new SecretKeySpec(key, AES);
@@ -69,12 +84,17 @@ public class CryptoUtils {
     public static String encryptAESGCMWithAAD(byte[] data, byte[] key, byte[] iv, byte[] aad) throws Exception {
 
         Cipher cipher = Cipher.getInstance(AES_GCM);
+
         SecretKeySpec keySpec = new SecretKeySpec(key, AES);
+
         GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
+
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmSpec);
+
         cipher.updateAAD(aad);
 
         byte[] encryptedData = cipher.doFinal(data);
+
         return Base64.getEncoder().encodeToString(encryptedData);
     }
 
@@ -146,6 +166,26 @@ public class CryptoUtils {
     }
 
 
-
+    /**
+     * Generates a 512-bit ElGamal key pair using bouncy castle 
+     * 
+     * @return KeyPair object containing the public and private key
+     * @throws NoSuchAlgorithmException 
+     * @throws NoSuchProviderException  
+     */
+    public static KeyPair generateElGamalKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException {
+        
+        // ensure bouncy castle is used
+        if (Security.getProvider("BC") == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
+        
+        // Create a KeyPairGenerator instance for ElGamal algorithm using Bouncy Castle ("BC")
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("ElGamal", "BC");
+        keyPairGenerator.initialize(512, new SecureRandom()); // 512-bit key pair
+        
+        // Generate and return the ElGamal key pair
+        return keyPairGenerator.generateKeyPair();
+    }
 
 }

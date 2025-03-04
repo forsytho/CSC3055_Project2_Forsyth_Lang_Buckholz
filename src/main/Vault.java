@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
 import java.util.Base64;
 import java.util.Scanner;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -169,11 +170,60 @@ public class Vault {
         if(password == null || salt == null){
             throw new IllegalArgumentException("Error: Password and salt cannot be null.");
         }
-
         return SCrypt.generate(password.getBytes(StandardCharsets.UTF_8), salt, SCRYPT_COST, SCRYPT_BLOCK_SIZE, SCRYPT_PARALLELIZATION, SCRYPT_KEY_LENGTH);
     }
 
 
+     /**
+      * Generates random password of given length for a given (service, username) pair and stores it in the vault as password entry
+      * New random password is encrypted using AES-GCM with Additional Authenticated Data constructed from service and username
+      *  
+      * @param length   - given length of the password
+      * @param service  - given service, aad
+      * @param username - given username, aad
+
+      * @throws GeneralSecurityException
+      * @throws IOException
+      */
+    
+    public void addRandomPasswordEntry(int length, String service, String username) throws GeneralSecurityException, IOException {
+        
+        // Generate a new random password string for the service and username
+        String generatedPassword = CryptoUtils.generateRandomPassword(length);
+        byte [] passwordBytes = generatedPassword.getBytes(StandardCharsets.UTF_8);
+
+        // Generate a new IV for this password entry
+        byte[] entryIV = CryptoUtils.generateRandomBytes(12);
+
+        // Construct the additional authenticated data (AAD) for the encryption
+        String aadString = service + username;
+        byte[] aad = aadString.getBytes(StandardCharsets.UTF_8);
+
+        // Encrypt the plaintext password using the raw vault key and the newly generated IV
+        try {
+            generatedPassword = CryptoUtils.encryptAESGCMWithAAD(
+                    passwordBytes,
+                    rawVaultKey,
+                    entryIV,
+                    aad
+            );
+        } catch (Exception e) {
+            throw new GeneralSecurityException("Error encrypting password entry", e);
+        }
+
+        // Create a new PasswordEntry object and add it to the vault data
+        PasswordEntry newEntry = new PasswordEntry(
+                Base64.getEncoder().encodeToString(entryIV),
+                service,
+                username,
+                generatedPassword
+        );
+
+        // Add the new entry to the vault data and save the updated vault to disk.
+        vaultData.getPasswords().add(newEntry);
+
+        JsonHandler.saveVault(vaultData);
+    }
     /**
      * Adds a new password entry object to the vault
      * Encrypts the plaintext password with raw vault key
@@ -310,10 +360,63 @@ public class Vault {
         System.out.println("Private key entry added.");
     }
 
+    /** 
+     * Generate ElGamal key pair and store the private key in the vault, displaying the public key to the user
+     * 
+     * @param service - service name associated with the key pair
+     * @throws Exception
+     */
+    public void addNewElGamal(String service) throws Exception {
+        
+    // Generate a 512-bit ElGamal key pair using the new CryptoUtils method
+    KeyPair elGamalKeyPair = CryptoUtils.generateElGamalKeyPair();
+    
+    // Convert the public key to a Base64 string to display to the user
+    String publicKeyBase64 = Base64.getEncoder().encodeToString(elGamalKeyPair.getPublic().getEncoded());
+    
+    // get the private key bytes from the key pair
+    byte[] privateKeyBytes = elGamalKeyPair.getPrivate().getEncoded();
 
+    
+    
+    // Encrypt and store the private key using your existing method for private keys
+    addPrivateKeyEntry(service, privateKeyBytes);
+    
+    // Output the public key so the user can use it as needed
+    System.out.println("ElGamal Public Key (Base64): " + publicKeyBase64);
+}
 
+    /**
+     * Lookup an Elgamal private key given a service name and output as a Base64 encoded string.
+     * 
+     * @param args
+     */
+    public String lookupElGamalPrivateKey(String service) throws GeneralSecurityException {
 
+        // Iterate through the stored private key entries in the vault
+        for (PrivateKeyEntry entry : vaultData.getPrivkeys()) {
 
+            // Check if the service matches the given service
+            if (entry.getService().equals(service)) {
+
+                // Retrieve the IV for this private key entry (Base64-decoded)
+                byte[] entryIV = Base64.getDecoder().decode(entry.getIv());
+                // Try to decrypt the stored encrypted private key using the raw vault key and IV
+                try {
+                    byte[] decryptedBytes = CryptoUtils.decryptAESGCM(
+                        Base64.getDecoder().decode(entry.getPrivkey()),
+                        rawVaultKey,
+                        entryIV
+                    );
+
+                    // Turn the returned bytes back into a string and return this constructed plaintext private key
+                    return Base64.getEncoder().encodeToString(decryptedBytes);
+                } catch (Exception e) {
+                    throw new GeneralSecurityException("Error decrypting private key for service: " + service, e);
+                }
+            }
+        }
+        return "Service not found.";
 
     
     /**
