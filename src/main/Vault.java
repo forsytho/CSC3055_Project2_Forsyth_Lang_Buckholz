@@ -25,8 +25,8 @@ public class Vault {
 
 
     // Instance variables
-    private VaultData vaultData; // Vault data, which includes base64 encoded salt, vault key, and secrets
-    private byte[] rawVaultKey; // Raw vault key, used to encrypt/decrypt secret vault data
+    private VaultData vaultData; // Vault data object, which includes base64 encoded salt, vault key, and encrypted secrets
+    private byte[] rawVaultKey;  // Raw vault key, used to encrypt/decrypt secret vault data
 
 
     /**
@@ -43,6 +43,7 @@ public class Vault {
 
         if (!new File(VAULT_FILE).exists()) {
 
+            System.out.println("No existing vault found. ");
             createNewVault(password);
 
         } else {
@@ -58,7 +59,7 @@ public class Vault {
      * Randomly generates 32 byte vault encryption key, and 12 byte IV  
      * 
      * 
-     * @param vaultPassword - passed in at creation to generate vault keys. User must know this password to access vault in the future
+     * @param vaultPassword - passed in at creation to generate vault derived key. User must know this password to access vault in the future
      * @throws GeneralSecurityException
      * @throws IOException
      */
@@ -90,6 +91,7 @@ public class Vault {
             throw new GeneralSecurityException("Error encrypting vault key", e);
         }
 
+
         // Create VaultKey object (represents the encrypted vault key and associated IV)
         VaultKey vaultKeyObject = new VaultKey(
             Base64.getEncoder().encodeToString(vaultKeyEncryptionIV), 
@@ -119,13 +121,21 @@ public class Vault {
 
         System.out.println("Grabbing existing vault metadata...");
 
-        // First, load only the necessary vault metadata (salt + encrypted vault key)
         VaultData tempVaultData = JsonHandler.loadVaultMetadata();
-        if (tempVaultData == null) {
-            System.err.println("Error: Vault metadata could not be loaded.");
-            System.exit(1);
-        }
+
+        
+
+        // check for missing crucial data
+        if( tempVaultData.getSalt()               == null || 
+             tempVaultData.getVaultKey().getIv()  == null || 
+             tempVaultData.getVaultKey().getKey() == null  
+            ) {
     
+            throw new GeneralSecurityException("Error unsealing vault: missing crucial data");
+        }
+
+    
+       
         // Extract salt from vault metadata
         byte[] storedSalt = Base64.getDecoder().decode(tempVaultData.getSalt());
     
@@ -149,9 +159,9 @@ public class Vault {
             System.out.println("Vault successfully unsealed.");
 
         } catch (Exception e) {
+
             // If decryption fails, password is incorrect
-            System.err.println("Error: Incorrect password! Vault remains locked.");
-            System.exit(1);
+            throw new GeneralSecurityException("Error unsealing vault: incorrect password", e);
         }
     }
     
@@ -165,7 +175,9 @@ public class Vault {
      * @return - derived key
      */
     private byte[] deriveKey(String password, byte[] salt) {
+
         if(password == null || salt == null){
+
             throw new IllegalArgumentException("Error: Password and salt cannot be null.");
         }
         return SCrypt.generate(password.getBytes(StandardCharsets.UTF_8), salt, SCRYPT_COST, SCRYPT_BLOCK_SIZE, SCRYPT_PARALLELIZATION, SCRYPT_KEY_LENGTH);
@@ -206,6 +218,7 @@ public class Vault {
                     aad
             );
         } catch (Exception e) {
+
             throw new GeneralSecurityException("Error encrypting password entry", e);
         }
 
@@ -376,15 +389,14 @@ public class Vault {
     
     // get the private key bytes from the key pair
     byte[] privateKeyBytes = elGamalKeyPair.getPrivate().getEncoded();
-
-    
     
     // Encrypt and store the private key using your existing method for private keys
     addPrivateKeyEntry(service, privateKeyBytes);
     
     // Output the public key so the user can use it as needed
     System.out.println("ElGamal Public Key (Base64): " + publicKeyBase64);
-}
+    }
+
 
     /**
      * Lookup an Elgamal private key given a service name and output as a Base64 encoded string.
@@ -417,52 +429,5 @@ public class Vault {
             }
         }
         return "Service not found.";
-    }
-
-    
-    /**
-     * Main method for the Vault program
-     * Queries user for vault password
-     * 
-     * @param args
-     */
-    public static void main(String[] args) {
-
-        // initialize scanner and console
-        Scanner scanner = new Scanner(System.in);
-        Console console = System.console();
-    
-        // ask the user for the vault password
-        String password;
-        if (console != null) {
-            password = new String(console.readPassword("Vault Password: ")); // Secure input (hidden)
-        } else {
-            System.out.print("Vault Password: ");
-            password = scanner.nextLine(); // Fallback for IDEs
-        }
-    
-
-        // instantiate vault object
-        Vault vault;
-
-        // try to load vault with given password, else 
-        try {
-            if (new File("vault.json").exists()) {
-                // Step 3: Attempt to load existing vault with given password
-                vault = new Vault(password);
-            } else {
-                // Step 4: If no vault exists, create a new one
-                System.out.println("No vault found. Creating a new one...");
-                vault = new Vault(password);
-            }
-    
-            // Step 5: Start CLI (or GUI)
-            CLIHandler cli = new CLIHandler(vault);
-            cli.start(); 
-    
-        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 }

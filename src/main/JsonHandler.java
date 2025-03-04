@@ -42,7 +42,7 @@ public class JsonHandler {
 
 
     /**
-     * Loads only the salt and vault key from vault.json, both being the only required fields for authentication
+     * Loads only the salt and vault key from vault.json onto memory
      * Prevents loading of encrypted secrets to memory before authentication
      * 
      * @return
@@ -53,10 +53,11 @@ public class JsonHandler {
         // Check if vault.json exists
         if (!file.exists()) {
             System.out.println("No existing vault found.");
-            return null;  // Vault doesn't exist
+            return null;  
         }
     
         try {
+
             // Read only the required fields from JSON
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(file);
@@ -68,7 +69,8 @@ public class JsonHandler {
             JsonNode vaultKeyNode = root.get("vaultKey");
             String iv = vaultKeyNode.get("iv").asText();
             String encryptedKey = vaultKeyNode.get("key").asText();
-    
+
+            // Create a VaultKey object to attach to the VaultData object that is returned
             VaultKey vaultKey = new VaultKey(iv, encryptedKey);
     
             // Return a minimal VaultData object with only the necessary info
@@ -90,14 +92,18 @@ public class JsonHandler {
     public static VaultData loadVault(){
 
         File file = new File(VAULT_FILE);
+
         if(!file.exists()){
             System.out.println("No existing vault found. Creating a new vault.");
             return null; //The Vault class should handle this and create a new vault.
         }
 
-        try{
+        try {
+
             return objectMapper.readValue(file, VaultData.class);
+
         } catch (IOException e){
+
             System.err.println("Error loading vault.json,  file may be corrupted.");
             return null;
         }
