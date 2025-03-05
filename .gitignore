@@ -12,7 +12,7 @@
 
 # Package Files #
 
-
+merrimackutil.jar
 *.war
 *.nar
 *.ear
