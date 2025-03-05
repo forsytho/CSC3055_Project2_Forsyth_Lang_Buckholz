@@ -5,33 +5,34 @@
  */
 public abstract class VaultEntry {
 
-    protected String iv;      
-    protected String service; // service name 
+    protected String iv;
+    protected String service;
 
-
-     /**
-     * Constructs a VaultEntry with given IV and service name.
-     *
-     * @param iv      Base64 encoded IV used for encryption
-     * @param service Name of the service associated with entry
-     */
-    public VaultEntry(String iv, String service) {
-        this.iv = iv;
-        this.service = service;
+    // Default constructor for Jackson
+    public VaultEntry() {
     }
 
-    /**
-     * Gets the IV used for encryption.
-     *
-     * @return The IV as a Base64-encoded string.
-     */
-    public String getIv() { return iv; }
+    // Constructor
+    public VaultEntry(String iv, String service) {
+        this.iv = iv;
+        this.service = service; 
+    }
 
-    /**
-     * Gets the service name.
-     *
-     * @return The service name.
-     */
-    public String getService() { return service; }
+    // Getters and setters
+    
+    public String getIv() {
+        return iv;
+    }
 
+    public void setIv(String iv) {
+        this.iv = iv;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
+    }
 }

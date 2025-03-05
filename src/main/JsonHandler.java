@@ -59,6 +59,8 @@ public class JsonHandler {
     
         try {
 
+            System.out.println("Loading vault metadata...");
+
             // Read only the required fields from JSON
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(file);
@@ -78,9 +80,7 @@ public class JsonHandler {
             return new VaultData(salt, vaultKey);
     
         } catch (IOException e) {
-            System.err.println("Error loading vault metadata. The file may be corrupted.");
-            return null;
-        }
+            return null;        }
     }
 
 
@@ -106,6 +106,7 @@ public class JsonHandler {
         } catch (IOException e){
 
             System.err.println("Error loading vault.json,  file may be corrupted.");
+            e.printStackTrace(); // Logs the stack trace for debugging.
             return null;
         }
     }

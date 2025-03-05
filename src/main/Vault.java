@@ -124,7 +124,9 @@ public class Vault {
 
         VaultData tempVaultData = JsonHandler.loadVaultMetadata();
 
-        
+        if (tempVaultData == null) {
+            System.err.println(" New message: temp data is null");
+        }
 
         // check for missing crucial data
         if( tempVaultData.getSalt()               == null || 

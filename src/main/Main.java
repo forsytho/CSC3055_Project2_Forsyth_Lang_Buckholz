@@ -37,12 +37,11 @@ public class Main {
                 vault = null; // Ensure vault remains null so loop continues
             }
         }
-
-        scanner.close();
         
         // Once authenticated, pass the vault to the CLI handler.
         CLIHandler cli = new CLIHandler(vault);
         cli.start();
+        scanner.close();
     }
 }
 

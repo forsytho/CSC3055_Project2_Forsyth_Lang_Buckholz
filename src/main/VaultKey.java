@@ -6,31 +6,33 @@ public class VaultKey {
     private String iv;
     private String key;
 
-    /**
-     * Constructor for VaultKey
-     * @param iv - IV used for encryption of the raw vault key
-     * @param Key - encrypted version of raw vault key
-     */
+
+    // Default constructor for Jackson JSON serialization
+    public VaultKey() {
+    }
+
+    // Constructor
     public VaultKey(String iv, String key) {
         this.iv = iv;
         this.key = key;
     }
 
-    /**
-     * Gets IV used for encryption of the raw vault key
-     * @return - IV in Base64 format
-     */
+   // getters and setters
+
     public String getIv() {
         return iv;
     }
 
+    public void setIv(String iv) {
+        this.iv = iv;
+    }
 
-    /**
-     * Gets encrypted vault key
-     * @return - encrypted vault key in Base64 format
-     */
+   
     public String getKey() {
         return key;
     }
     
+    public void setKey(String key) {
+        this.key = key;
+    }
 }

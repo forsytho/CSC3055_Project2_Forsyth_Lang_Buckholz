@@ -86,7 +86,6 @@ public class CLIHandler {
         String password = scanner.nextLine();
 
         vault.addPasswordEntry(service, username, password);
-        System.out.println("Password entry added.");
     }
 
     /**

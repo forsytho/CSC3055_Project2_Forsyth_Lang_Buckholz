@@ -1,0 +1,32 @@
+{
+  "salt" : "geIhVLojg8iL91W6VXA/Ow==",
+  "vaultKey" : {
+    "iv" : "aLMa2mFq1jE/4W3h",
+    "key" : "45ypNqwEgPbovBPQGZR5yclRyyZc/xApukai4IZevXgN5/pvAOkvpbyCvNUMkPW8"
+  },
+  "passwords" : [ {
+    "iv" : "xjC7Dm42uD89NSc6",
+    "service" : "google",
+    "pass" : "wJCaWOfhfX3J166edyE1hVYJpdrFJfk=",
+    "user" : "owenr"
+  }, {
+    "iv" : "iIDWsu+ONVPQxHTB",
+    "service" : "random",
+    "pass" : "9ieFvC+jMTgUdevchgRD/lkEO8OVXVym",
+    "user" : "random"
+  }, {
+    "iv" : "xouAgGKCnCKWigC8",
+    "service" : "new",
+    "pass" : "HtItL4fnUOT6IPfmkWBcTp+QYg==",
+    "user" : "new"
+  } ],
+  "privkeys" : [ {
+    "iv" : "7hDY/m3hTzOfeD20",
+    "service" : "privatekey",
+    "privkey" : "O9xp6rxMYCZHkFOo91LFH7hlFQ=="
+  }, {
+    "iv" : "tln717cCjg/7xjeF",
+    "service" : "RandomGamal",
+    "privkey" : "S2rQFldaaBh+5Rk4Z0y7QoW2gqpHuVzYtUVxpMNHdxZMCO8I8Lcyh0BvpCN6Bqa0kPEj7gYjzqAkIIryHAGQqzpe/vaXIkZy2N22zAQ7VFHkceBORQuKd2Ds+qe3H0PwFLNIOR2/WpOwrGSuOBH4OjG+1yec8Qk5cwjl3+o/B780mShE+6Sc9JtUL7ffujjbjvNRZvRVcaFCocJYR1kF2Frztg9uNTIQbPEgnn4CKJpDCbpLq+9E87wSJwC7jP20j+0bDU7CWT/xbRz9CZ7+gy47te+6Wz9gOmpzyTtHvbxk0mVDmDuAFDxqrOgl"
+  } ]
+}

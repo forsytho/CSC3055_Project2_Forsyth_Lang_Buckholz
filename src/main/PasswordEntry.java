@@ -6,14 +6,11 @@ public class PasswordEntry extends VaultEntry {
     private String pass; // Encrypted password
     private String user; // Username for the service
 
-    /**
-     * Constructs a PasswordEntry with the given IV, service name, and password
-     *
-     * @param iv      Base64-encoded IV used for encryption
-     * @param service name of the service associated with the password
-     * @param user    username for the service
-     * @param pass    encrypted password stored as a Base64-encoded string
-     */
+    
+    // Default constructor for Jackson JSON serialization
+    public PasswordEntry() {
+    }
+
     public PasswordEntry(String iv, String service, String user, String pass) {
         super(iv, service);
         this.user = user;
@@ -21,17 +18,13 @@ public class PasswordEntry extends VaultEntry {
     }
 
 
-    /**
-     * Gets username 
-     * @return user
-     */
+
     public String getUser() { return user; }
 
-    /**
-     * Gets the password
-     *
-     * @return encrypted password as a Base64 string
-     */
     public String getPass() { return pass; }
+
+    public void setUser(String user) { this.user = user; }
+
+    public void setPass(String pass) { this.pass = pass; }
 
 }
